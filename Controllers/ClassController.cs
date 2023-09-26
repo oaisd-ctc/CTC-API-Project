@@ -15,8 +15,29 @@ public class ClassController : ControllerBase
         _connectionString = configuration.GetConnectionString("ctc_dev_DBConnection");
     }
 
-    [HttpGet(Name = "GetClasses")]
-    public IEnumerable<Class> Get([FromQuery(Name = "id")] string id)
+    [HttpPost(Name = "CreateClasses")]
+    public async Task<IActionResult> Create([FromBody] Class _class)
+    {
+        string commandText = "INSERT INTO classes (class_name) VALUES (@className)";
+
+        using (SqlConnection conn = new SqlConnection(_connectionString))
+        {
+            conn.Open();
+
+            using SqlCommand cmd = new SqlCommand(commandText, conn);
+
+
+            cmd.Parameters.Add("@className", SqlDbType.VarChar);
+            cmd.Parameters["@className"].Value = _class.ClassName;
+            cmd.ExecuteNonQuery();
+
+            return Ok("Class Created");
+
+        }
+    }
+
+    [HttpGet(Name = "ReadClasses")]
+    public IEnumerable<Class> Read([FromQuery(Name = "id")] string id)
     {
         var classes = new List<Class>();
 
@@ -40,28 +61,52 @@ public class ClassController : ControllerBase
                 }
             }
         }
-
         return classes;
     }
 
-    [HttpPost(Name = "PostClasses")]
-    public async Task<IActionResult> Post([FromBody] Class _class)
+    [HttpPut(Name = "UpdateClasses")]
+    public async Task<IActionResult> Update([FromBody]Class _class)
     {
-        string commandText = "INSERT INTO classes (class_name) VALUES (@className)";
+        string commandText = "UPDATE classes SET class_name = @className WHERE class_id = @id";
 
         using (SqlConnection conn = new SqlConnection(_connectionString))
         {
             conn.Open();
 
             using SqlCommand cmd = new SqlCommand(commandText, conn);
-            
+
 
             cmd.Parameters.Add("@className", SqlDbType.VarChar);
             cmd.Parameters["@className"].Value = _class.ClassName;
+
+            cmd.Parameters.Add("@id", SqlDbType.Int);
+            cmd.Parameters["@id"].Value = _class.ClassId;
             cmd.ExecuteNonQuery();
 
-            return Ok("Class Created");
-            
+            return Ok("Classes Updated");
+
         }
     }
+
+    [HttpDelete(Name = "DeleteClasses")]
+    public async Task<IActionResult> Delete([FromBody] Class _class)
+    {
+        string commandText = "DELETE FROM classes WHERE class_id = @id";
+
+        using (SqlConnection conn = new SqlConnection(_connectionString))
+        {
+            conn.Open();
+
+            using SqlCommand cmd = new SqlCommand(commandText, conn);
+
+
+            cmd.Parameters.Add("@id", SqlDbType.Int);
+            cmd.Parameters["@id"].Value = _class.ClassId;
+            cmd.ExecuteNonQuery();
+
+            return Ok("Class Deleted");
+
+        }
+    }
+
 }
