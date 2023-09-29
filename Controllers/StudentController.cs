@@ -124,7 +124,7 @@ public class StudentController : ControllerBase
     [HttpDelete(Name = "DeleteStudents")]
     public async Task<IActionResult> Delete([FromBody] School school)
     {
-        string commandText = "DELETE FROM schools WHERE school_id = @id";
+        string commandText = "DELETE FROM students WHERE student_id = @id";
 
         using (SqlConnection conn = new SqlConnection(_connectionString))
         {
